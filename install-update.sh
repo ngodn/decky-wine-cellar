@@ -15,12 +15,27 @@ NC='\033[0m' # No Color
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_NAME="decky-wine-cellar"
-PLUGIN_VERSION="0.1.6"
-TARGET_DIR="/home/deck/homebrew/plugins/${PLUGIN_NAME}-${PLUGIN_VERSION}"
+PLUGIN_VERSION=$(grep -oP '"version":\s*"\K[^"]+' "${SCRIPT_DIR}/package.json")
+HOMEBREW_DIR="${HOME}/homebrew"
+
+# Find the installed plugin directory (may have different version suffix)
+if [[ -d "${HOMEBREW_DIR}/plugins" ]]; then
+    INSTALLED_DIR=$(find "${HOMEBREW_DIR}/plugins" -maxdepth 1 -type d -name "${PLUGIN_NAME}*" | head -1)
+fi
+
+# Use found directory or default to version from package.json
+if [[ -n "${INSTALLED_DIR}" ]]; then
+    TARGET_DIR="${INSTALLED_DIR}"
+else
+    TARGET_DIR="${HOMEBREW_DIR}/plugins/${PLUGIN_NAME}-${PLUGIN_VERSION}"
+fi
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Wine Cellar Plugin Build & Install${NC}"
 echo -e "${BLUE}========================================${NC}"
+echo ""
+echo -e "${BLUE}Version: ${PLUGIN_VERSION}${NC}"
+echo -e "${BLUE}Target:  ${TARGET_DIR}${NC}"
 echo ""
 
 # Check if we're in the right directory
